@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Happy Cat</title>
+	<link rel="stylesheet" type="text/css" href="css/font-awesome.css">
+    <script src="jquery.js"></script>
+	<script src="phaser.js"></script>
+	<link rel="stylesheet" type="text/css" href="jssocials.css" />
+	<link rel="stylesheet" type="text/css" href="jssocials-theme-minima.css" />
+</head>
+
+<body>
+	
+	<div style="min-width: 500px; margin: 0 auto; text-align: center;">
+		<h1>Tap to keep it happy.</h1>
+		<div id="simeong" style="display: inline-block; padding: 10px;"></div>
+		<div style="text-align: center">
+			<div style="box-sizing: border-box; background-color: #cf7004; height: 3px; width: 100%; margin-bottom: 20px;" id="happiness"></div>
+			<p style="color: #cf7004"><i class="fa fa-heart"></i> <span id="happinessperc">100%</span></p>
+		</div>
+	</div>
+
+    <script>
+		
+		
+		//App Data
+		var appData = { 
+			title : "simeong", 
+			happiness : 100
+		}
+
+		if(localStorage.getItem(appData.title) !== null){
+			appData = JSON.parse(localStorage.getItem(appData.title))
+		}else{
+			saveData()
+		}
+
+		function saveData(){
+			localStorage.setItem(appData.title, JSON.stringify(appData))
+		}
+		
+		var game = new Phaser.Game(256, 256, Phaser.AUTO, "simeong")
+		var simeongGame = {}
+		var simeong
+		simeongGame.Main = {
+			preload : function(){		
+				game.load.spritesheet("simeong", "imgs/simeong.jpg", 128, 96, 16)
+			},
+			create : function(){
+				game.stage.backgroundColor = "#ffffff"
+				simeong = game.add.sprite(game.width/2, game.height/2, "simeong")
+				simeong.anchor.setTo(.5)
+				simeong.inputEnabled = true;
+				simeong.events.onInputDown.add(sTouched);
+				
+				tweenA = game.add.tween(simeong.scale).to({x: 1.2, y: 1.2}, 300, Phaser.Easing.Linear﻿.None, true, 0)
+				tweenB = game.add.tween(simeong.scale).to({x: 1, y: 1}, 300, Phaser.Easing.Linear﻿.None, true, 0)
+				tweenB.onComplete.add(function(){
+					currentFace()
+				})
+				tweenA.chain(tweenB)
+				
+				updateHappiness()
+				
+				function sTouched(){			
+					var happyface = [3, 5, 7, 9, 11, 12, 13, 14, 15]
+					simeong.frame = happyface[game.rnd.integerInRange(0, happyface.length-1)]
+					tweenA.start()
+					appData.happiness += 5
+					if(appData.happiness > 100)
+						appData.happiness = 100
+					saveData()
+					$("#happinessperc").html(appData.happiness + "%")
+					$("#happiness").css({ width :  appData.happiness + "%"})
+				}
+			},
+		}
+		
+		game.state.add("Main", simeongGame.Main)
+		game.state.start("Main")
+		
+		function currentFace(){
+			simeong.frame = 3
+		}
+		
+		function updateHappiness(){
+			appData.happiness -= 10
+			if(appData.happiness < 0)
+				appData.happiness = 0
+			saveData()
+			$("#happinessperc").html(appData.happiness + "%")
+			$("#happiness").css({ width :  appData.happiness + "%"})
+			setTimeout(function(){
+				updateHappiness()
+			}, 3000)
+			if(appData.happiness < 95)
+				simeong.frame = 5
+			if(appData.happiness < 90)
+				simeong.frame = 15
+			if(appData.happiness < 85)
+				simeong.frame = 2
+			if(appData.happiness < 80)
+				simeong.frame = 4
+			if(appData.happiness < 65)
+				simeong.frame = 6
+			if(appData.happiness < 60)
+				simeong.frame = 2
+			if(appData.happiness < 50)
+				simeong.frame = 10
+			if(appData.happiness < 40)
+				simeong.frame = 8
+		}
+		
+    </script>
+</body>
+</html>
